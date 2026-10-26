@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AT-CC // Swarm Mission Command &amp; Autonomous Chief Executor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- TOP COMMAND RIBBON & EDITABLE ACCOUNT TELEMETRY -->
+    <header id="command-ribbon">
+      <div class="brand-section">
+        <span class="brand-badge">AT-CC</span>
+        <span class="brand-title">TradingAgents Swarm &amp; Chief Executor</span>
+      </div>
+
+      <!-- Directly Editable Demo Account Cash & Equity Telemetry -->
+      <div class="account-telemetry-badge" id="account-telemetry-box" title="Click Cash to edit Demo buying power directly">
+        <div class="acc-item">
+          <span class="acc-label">DEMO CASH:</span>
+          <input type="text" id="editable-cash-field" class="editable-cash-input" value="$78,420.00" title="Type any cash amount and press Enter to adjust buying power">
+        </div>
+        <div class="acc-item">
+          <span class="acc-label">EQUITY:</span>
+          <span class="acc-val green" id="acc-equity">$104,850.20</span>
+        </div>
+        <div class="acc-item">
+          <span class="acc-label">UNREALIZED:</span>
+          <span class="acc-val green" id="acc-unrealized">+$1,240.50</span>
+        </div>
+      </div>
+
+      <!-- Autonomous Swarm Bot Toggle -->
+      <button id="btn-toggle-autonomous" class="btn-swarm-toggle" title="Engage the Chief Executor Agent to autonomously make decisions and execute trades on its own">
+        <span class="swarm-indicator-dot"></span>
+        <span>AUTONOMOUS BOT: <b id="txt-autonomous-status">STANDBY</b></span>
+      </button>
+
+      <!-- Training Journal Button -->
+      <button id="btn-open-journal" class="btn-tactical" title="Open and download the Chief Trader's complete execution &amp; self-critique journal for feeding into Claude/ChatGPT/Gemini">
+        TRAINING JOURNAL [AI]
+      </button>
+
+      <div class="ribbon-controls">
+        <!-- Ticker Selector -->
+        <div class="ticker-bar">
+          <select id="ticker-select" aria-label="Select Target Asset">
+            <option value="NVDA">NVDA &middot; NVIDIA</option>
+            <option value="AAPL">AAPL &middot; APPLE</option>
+            <option value="TSLA">TSLA &middot; TESLA</option>
+            <option value="MSFT">MSFT &middot; MICROSOFT</option>
+            <option value="AMD">AMD &middot; AMD</option>
+            <option value="SPY">SPY &middot; S&amp;P 500</option>
+            <option value="BTC/USD">BTC/USD &middot; BITCOIN</option>
+            <option value="ETH/USD">ETH/USD &middot; ETHEREUM</option>
+          </select>
+          <input type="text" id="custom-ticker-input" placeholder="CUSTOM" maxlength="6" aria-label="Custom Ticker Symbol">
+        </div>
+
+        <!-- ADHD Tools: Focus Mode & Command Palette -->
+        <button id="btn-toggle-focus" class="btn-tactical" title="Toggle ADHD Focus Mode (Dim distractions, spotlight asset &amp; trade ticket) [Hotkey: F]">
+          FOCUS: <span id="focus-status">OFF</span>
+        </button>
+
+        <button id="btn-open-palette" class="btn-tactical" title="Open quick command palette [Hotkey: Ctrl+K]">
+          CMD [K]
+        </button>
+
+        <button id="btn-auto-refresh" class="btn-tactical" title="Toggle real-time market tick generator">
+          TICK: <span id="auto-tick-status">3s</span>
+        </button>
+
+        <button id="btn-toggle-sound" class="btn-tactical" title="Toggle tactile mechanical acoustic feedback [Hotkey: M]">
+          AUDIO: <span id="sound-status">ON</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN 3-COLUMN WORKSPACE -->
+    <main id="workspace-body">
+      <!-- LEFT COLUMN: RESEARCHERS & ANALYST TOPOLOGY -->
+      <section class="telemetry-column" id="team-column" aria-label="Research &amp; Analyst Team">
+        <div class="panel-header">
+          <span>RESEARCH &amp; ANALYSTS [7 NODES]</span>
+          <span class="code-tag">TAURIC ENGINE</span>
+        </div>
+
+        <div class="panel-content" id="agent-roster-list">
+          <!-- Bull Researcher -->
+          <div class="agent-node" id="node-bull" data-agent="bull">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[RES-BULL]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>ACTIVE</span>
+              </div>
+            </div>
+            <div class="agent-name">Bullish Thesis Researcher</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">UPSIDE TARGET</span>
+                <span class="metric-value bull" id="bull-target">$146.20 (+13.8%)</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">PRIMARY CATALYST</span>
+                <span class="metric-value" id="bull-catalyst">BLACKWELL EXPANSION</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bear Researcher -->
+          <div class="agent-node" id="node-bear" data-agent="bear">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[RES-BEAR]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>ACTIVE</span>
+              </div>
+            </div>
+            <div class="agent-name">Bearish Counter Researcher</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">DOWN RISK STOP</span>
+                <span class="metric-value bear" id="bear-stop">$124.50 (-3.1%)</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">PRIMARY RISK</span>
+                <span class="metric-value" id="bear-risk">VALUATION MULTIPLE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fundamental Analyst -->
+          <div class="agent-node selected" id="node-fnd" data-agent="fundamentals">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[QUANT-FND]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>ONLINE</span>
+              </div>
+            </div>
+            <div class="agent-name">Fundamental Valuation Analyst</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">FORWARD P/E</span>
+                <span class="metric-value" id="fnd-pe">28.4x</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">DCF FAIR SPREAD</span>
+                <span class="metric-value bull" id="fnd-dcf">+14.2% DISCOUNT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Market Analyst -->
+          <div class="agent-node" id="node-mkt" data-agent="market">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[ALPHA-MKT]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>ONLINE</span>
+              </div>
+            </div>
+            <div class="agent-name">Technical &amp; Momentum Analyst</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">RSI MOMENTUM (14D)</span>
+                <span class="metric-value" id="mkt-rsi">64.2</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">TREND STRUCTURE</span>
+                <span class="metric-value bull" id="mkt-trend">BULLISH EXPANSION</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- News & Macro Analyst -->
+          <div class="agent-node" id="node-news" data-agent="news">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[INTELL-NEWS]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>ONLINE</span>
+              </div>
+            </div>
+            <div class="agent-name">Financial News &amp; Macro Analyst</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">HEADLINE PULSE</span>
+                <span class="metric-value amber" id="news-sentiment">MODERATE POSITIVE</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">REGULATORY DOCKET</span>
+                <span class="metric-value" id="news-catalyst">CLEAN // NO FLAGS</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sentiment & Retail Analyst -->
+          <div class="agent-node" id="node-soc" data-agent="social">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[SENT-SOC]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>ONLINE</span>
+              </div>
+            </div>
+            <div class="agent-name">Social Sentiment &amp; Orderflow</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">STOCKTWITS SCORE</span>
+                <span class="metric-value bull" id="soc-score">76/100</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">PUT / CALL VOLUME</span>
+                <span class="metric-value" id="soc-pc">0.62 (CALL HEAVY)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk & Compliance Sentinel -->
+          <div class="agent-node" id="node-rsk" data-agent="risk">
+            <div class="agent-top-row">
+              <span class="agent-id-badge">[SENTINEL-RSK]</span>
+              <div class="agent-status-indicator">
+                <span class="status-box online"></span>
+                <span>GUARDING</span>
+              </div>
+            </div>
+            <div class="agent-name">Risk &amp; Portfolio Sentinel</div>
+            <div class="agent-metric-grid">
+              <div class="metric-cell">
+                <span class="metric-label">VALUE AT RISK (99%)</span>
+                <span class="metric-value" id="rsk-var">2.14%</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">MAX POSITION SIZING</span>
+                <span class="metric-value amber" id="rsk-cap">4.50% EQUITY</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conviction Radar Breakdown -->
+          <div class="conviction-summary-box">
+            <div style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+              SWARM CONVICTION SKEW
+            </div>
+            <div class="conviction-row">
+              <span>BULLISH WEIGHT</span>
+              <div class="mini-bar-track">
+                <div class="mini-bar-fill green" id="bar-bull-conviction" style="width: 78%;"></div>
+              </div>
+              <span id="txt-bull-pct">78%</span>
+            </div>
+            <div class="conviction-row">
+              <span>BEARISH SKEW</span>
+              <div class="mini-bar-track">
+                <div class="mini-bar-fill red" id="bar-bear-conviction" style="width: 22%;"></div>
+              </div>
+              <span id="txt-bear-pct">22%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER SECTION: TELEMETRY BAR, CHART, RESEARCH CHAT -->
+      <section class="telemetry-center" id="center-column">
+        <!-- Live Asset Telemetry Ribbon -->
+        <div id="asset-telemetry-bar">
+          <div class="telemetry-item">
+            <span class="telemetry-title">LAST QUOTE</span>
+            <span class="telemetry-num" id="telem-price">$128.45</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">SESSION DELTA</span>
+            <span class="telemetry-num up" id="telem-delta">+3.42%</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">SPREAD</span>
+            <span class="telemetry-num" id="telem-spread">$128.43 / $128.47</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">24H VOLUME</span>
+            <span class="telemetry-num" id="telem-vol">48.2M</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">VWAP</span>
+            <span class="telemetry-num" id="telem-vwap">$126.92</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">IMPLIED VOL</span>
+            <span class="telemetry-num" id="telem-volat">38.2%</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Interactive Canvas Candlestick & Volume Chart -->
+        <div id="chart-panel-container">
+          <div class="chart-toolbar">
+            <div class="timeframe-group">
+              <button class="btn-tab" data-tf="1m">1M</button>
+              <button class="btn-tab active" data-tf="5m">5M</button>
+              <button class="btn-tab" data-tf="15m">15M</button>
+              <button class="btn-tab" data-tf="1h">1H</button>
+              <button class="btn-tab" data-tf="1d">1D</button>
+            </div>
+
+            <div class="indicator-group">
+              <button class="btn-tab active" id="toggle-sma" title="Toggle SMA 20">SMA 20</button>
+              <button class="btn-tab active" id="toggle-ema" title="Toggle EMA 50">EMA 50</button>
+              <button class="btn-tab" id="toggle-bb" title="Toggle Bollinger Bands">BOLLINGER</button>
+              <button class="btn-tab active" id="toggle-volume" title="Toggle Volume profile">VOLUME</button>
+            </div>
+          </div>
+
+          <div id="chart-wrapper">
+            <canvas id="candlestick-canvas"></canvas>
+            <div id="crosshair-hud">
+              <span>TIME: <b id="hud-time">--</b></span>
+              <span>O: <b id="hud-o">--</b></span>
+              <span>H: <b id="hud-h">--</b></span>
+              <span>L: <b id="hud-l">--</b></span>
+              <span>C: <b id="hud-c">--</b></span>
+              <span>VOL: <b id="hud-v">--</b></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESEARCH CHAT & COPILOT TERMINAL -->
+        <div id="chat-panel-container">
+          <div class="chat-header-bar">
+            <span>RESEARCH COPILOT CHAT // RESEARCHERS ONLY</span>
+            <div class="chat-target-selector">
+              <select id="chat-scope-select" aria-label="Direct query to specific researcher">
+                <option value="all">ALL RESEARCHERS (CONSENSUS)</option>
+                <option value="bull">BULL RESEARCHER ONLY</option>
+                <option value="bear">BEAR RESEARCHER ONLY</option>
+                <option value="fnd">FUNDAMENTAL VALUATION ONLY</option>
+                <option value="mkt">TECHNICAL MOMENTUM ONLY</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quick Tactical Query Pills -->
+          <div class="quick-prompts-bar">
+            <button class="quick-prompt-btn" data-query="bull_thesis">BULL THESIS</button>
+            <button class="quick-prompt-btn" data-query="bear_counter">BEAR RISKS</button>
+            <button class="quick-prompt-btn" data-query="valuation_dcf">DCF FAIR VALUE</button>
+            <button class="quick-prompt-btn" data-query="news_catalysts">SEC &amp; CATALYSTS</button>
+            <button class="quick-prompt-btn" data-query="summary">EXECUTIVE SUMMARY</button>
+          </div>
+
+          <!-- Live Chat Stream -->
+          <div id="research-chat-history" role="log" aria-live="polite">
+            <!-- Messages injected dynamically -->
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <input type="text" id="chat-input-field" class="chat-input-field" placeholder="Ask researchers directly (e.g. 'Why is the Bear cautious on NVDA?')" aria-label="Ask research team">
+            <button id="btn-send-chat" class="btn-tactical primary">SEND</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: DUAL-MODE ENGINE & CHIEF EXECUTOR -->
+      <section class="telemetry-column right" id="execution-column" aria-label="Chief Executor &amp; Ledger">
+        <div class="panel-header">
+          <span>APEX EXECUTOR &amp; DUAL-ENGINE</span>
+          <span class="code-tag" id="chief-status-tag">ACTIVE DESK</span>
+        </div>
+
+        <div class="execution-desk">
+          <!-- Dual-Mode Switcher: Real-Time Trading vs Historical Backtesting -->
+          <div class="operational-mode-toggle">
+            <button class="mode-tab-btn active" id="tab-mode-trading">REAL-TIME TRADING</button>
+            <button class="mode-tab-btn" id="tab-mode-backtest">HISTORICAL BACKTEST</button>
+          </div>
+
+          <!-- Dynamic Master Action Button (Adapts to Trading or Backtesting Mode) -->
+          <button id="btn-master-action" class="btn-master-action trade-mode" title="First searches all 6 agent outputs, evaluates prohibited moves, and immediately executes Long/Short or runs backtest">
+            <span id="master-btn-title">SWARM PRE-SEARCH &amp; EXECUTE [AUTO LONG / SHORT]</span>
+            <span class="master-subtext" id="master-btn-subtitle">SEARCHES ALL 6 AGENTS FIRST &bull; PROHIBITS INVALID MOVES &bull; INSTANT TRIGGER</span>
+          </button>
+
+          <!-- VIEW A: REAL-TIME TRADING & CHIEF EXECUTOR PANEL -->
+          <div id="trading-controls-panel" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Chief Executor & Swarm Decision Box -->
+            <div class="swarm-executor-box">
+              <div class="executor-status-header">
+                <span style="font-weight: 800; font-size: 10px; color: var(--text-primary);">SWARM DECISION ENGINE</span>
+                <span class="executor-status-badge" id="bot-mode-badge">STANDBY // ASSISTED</span>
+              </div>
+
+              <!-- Cryptographic Decision Hash & Timeframe -->
+              <div class="decision-hash-line">
+                <span>DECISION NONCE: <span class="hash-val" id="decision-nonce">0x8F4A..7C12</span></span>
+                <span>TF: <b id="executor-tf-display" style="color: var(--text-primary);">5M INTRADAY</b></span>
+              </div>
+
+              <!-- Pre-Execution Security Latches -->
+              <div class="security-latch-grid">
+                <div class="latch-item pass" id="latch-circuit">
+                  <span>CIRCUIT BREAKER</span>
+                  <b style="color: var(--signal-green);">ARMED</b>
+                </div>
+                <div class="latch-item pass" id="latch-var">
+                  <span>VaR 99% &lt; 3.5%</span>
+                  <b style="color: var(--signal-green);" id="latch-var-val">2.14%</b>
+                </div>
+                <div class="latch-item pass" id="latch-liquidity">
+                  <span>SPREAD COMPRESSION</span>
+                  <b style="color: var(--signal-green);">PASS (0.03%)</b>
+                </div>
+                <div class="latch-item pass" id="latch-consensus">
+                  <span>SWARM SKEW &gt; 65%</span>
+                  <b style="color: var(--signal-green);" id="latch-skew-val">78.4%</b>
+                </div>
+              </div>
+
+              <!-- Active Decision Proposal -->
+              <div class="active-decision-box">
+                <div class="decision-action-title long" id="decision-action-title">
+                  <span>SWARM RECOMMENDATION: BUY / LONG</span>
+                  <span id="decision-conviction-badge" style="font-size: 9px; padding: 1px 4px; background: var(--signal-green); color: #000;">78.4% CONV.</span>
+                </div>
+                <div class="decision-reasoning-snippet" id="decision-reasoning-text">
+                  Autonomous Chief Executor: Blackwell backlog visibility and DCF undervaluation (+14.2%) outweigh multi-quarter multiple expansion concerns. Stop strictly anchored at $124.50.
+                </div>
+              </div>
+
+              <!-- Multi-Agent Pre-Search & Prohibition Invariant Matrix -->
+              <div class="prohibition-audit-box" id="prohibition-audit-box">
+                <div class="prohibition-header">
+                  <span>MULTI-AGENT PRE-SEARCH &amp; INVARIANT VETO</span>
+                  <span class="prohibition-tag" id="prohibition-badge">SWARM SYNCHRONIZED</span>
+                </div>
+                <div class="prohibition-matrix">
+                  <div class="prohibition-cell" id="matrix-cell-short">
+                    <span class="matrix-label">SHORT MOVE:</span>
+                    <span class="matrix-status forbidden" id="matrix-short-status">PROHIBITED // DCF DISCOUNT</span>
+                  </div>
+                  <div class="prohibition-cell" id="matrix-cell-long">
+                    <span class="matrix-label">LONG MOVE:</span>
+                    <span class="matrix-status authorized" id="matrix-long-status">AUTHORIZED // 78.4% SKEW</span>
+                  </div>
+                </div>
+                <div class="prohibition-audit-text" id="prohibition-audit-text">
+                  Multi-agent sweep complete across all 6 specialists. DCF intrinsic undervaluation (+14.2%) and Blackwell pipeline demand veto shorting. Immediate Long entry approved.
+                </div>
+              </div>
+
+              <!-- Minimal User Input: Only Allocation Percentage Slider -->
+              <div class="minimal-input-box">
+                <div class="minimal-input-label-row">
+                  <span>RISK ALLOCATION PERCENTAGE</span>
+                  <b id="txt-alloc-pct" style="color: var(--accent-amber); font-size: 11px;">2.0% ($2,097.00)</b>
+                </div>
+                <input type="range" min="0.5" max="10.0" step="0.5" value="2.0" class="tactical-range" id="slider-alloc-pct">
+                <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 8px; color: var(--text-muted);">
+                  <span>0.5% (CONSERVATIVE)</span>
+                  <span>2.0% (BALANCED)</span>
+                  <span>5.0% (GROWTH)</span>
+                  <span>10.0% (MAX)</span>
+                </div>
+              </div>
+
+              <!-- Additional Action Buttons -->
+              <div style="display: flex; gap: 6px;">
+                <button id="btn-force-critique" class="btn-tactical" style="flex: 1; padding: 6px;" title="Trigger the Chief Executor to self-critique its previous decisions and adapt policy">
+                  SELF-REFLECT &amp; ADAPT
+                </button>
+              </div>
+            </div>
+
+            <!-- Real-Time Open Positions Table -->
+            <div class="positions-box">
+              <div class="positions-header">
+                <span>OPEN POSITIONS (DEMO BROKER)</span>
+                <span id="pos-count">2 ACTIVE</span>
+              </div>
+              <div id="positions-list">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW B: HISTORICAL BACKTESTING CONTROLS PANEL -->
+          <div id="backtest-controls-panel">
+            <div class="swarm-executor-box">
+              <div class="executor-status-header">
+                <span style="font-weight: 800; font-size: 10px; color: var(--signal-cyan);">SWARM BACKTEST ENGINE</span>
+                <span class="executor-status-badge" style="color: var(--signal-cyan); border-color: var(--signal-cyan);">HISTORICAL PROPAGATION</span>
+              </div>
+
+              <!-- Backtest Horizon Selector -->
+              <div style="font-size: 8px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px;">SIMULATION LOOKBACK HORIZON</div>
+              <div style="display: flex; gap: 3px; margin-bottom: 8px;">
+                <button class="btn-tab" data-bthorizon="30d">30 DAYS</button>
+                <button class="btn-tab active" data-bthorizon="90d">90 DAYS</button>
+                <button class="btn-tab" data-bthorizon="180d">180 DAYS</button>
+                <button class="btn-tab" data-bthorizon="1y">1 YEAR</button>
+              </div>
+
+              <!-- Backtest Cumulative Telemetry Stats -->
+              <div class="backtest-stats-grid">
+                <div class="bt-stat-cell">
+                  <div style="font-size: 8px; color: var(--text-muted);">TOTAL PnL (90D)</div>
+                  <div style="font-size: 13px; font-weight: 700; color: var(--signal-green);" id="bt-panel-pnl">+$41,850.20 (+24.8%)</div>
+                </div>
+                <div class="bt-stat-cell">
+                  <div style="font-size: 8px; color: var(--text-muted);">WIN RATE</div>
+                  <div style="font-size: 13px; font-weight: 700; color: var(--text-primary);" id="bt-panel-winrate">68.4% (39 / 57)</div>
+                </div>
+                <div class="bt-stat-cell">
+                  <div style="font-size: 8px; color: var(--text-muted);">SHARPE RATIO</div>
+                  <div style="font-size: 13px; font-weight: 700; color: var(--accent-amber);" id="bt-panel-sharpe">2.41</div>
+                </div>
+                <div class="bt-stat-cell">
+                  <div style="font-size: 8px; color: var(--text-muted);">MAX DRAWDOWN</div>
+                  <div style="font-size: 13px; font-weight: 700; color: var(--signal-red);" id="bt-panel-maxdd">-4.18%</div>
+                </div>
+              </div>
+
+              <div style="font-size: 9px; color: var(--text-secondary); line-height: 1.35; margin-bottom: 8px; background: var(--bg-secondary); padding: 6px; border: 1px solid var(--border-subtle);">
+                Backtest engine propagates historical price and SEC balance sheet snapshots through all 6 specialist agents with an execution slippage model of 0.03%.
+              </div>
+
+              <button id="btn-view-backtest-modal" class="btn-tactical" style="width: 100%; padding: 6px;">
+                OPEN DETAILED TRADE-BY-TRADE AUDIT
+              </button>
+            </div>
+          </div>
+
+          <!-- Stress Testing: Dynamic Shock Injector -->
+          <div style="background: var(--bg-primary); border: 1px solid var(--border-subtle); padding: 6px;">
+            <div style="font-size: 8px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase;">
+              STRESS TEST // INJECT SHOCK
+            </div>
+            <select id="shock-selector" style="width: 100%; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-medium); font-family: var(--font-mono); font-size: 9px; padding: 3px; margin-bottom: 4px; outline: none;">
+              <option value="earnings_beat">EARNINGS SURPRISE (+16% REV, GUIDANCE RAISE)</option>
+              <option value="fed_hike">HAWKISH FED SPIKE (+50 BPS, LIQUIDITY SQUEEZE)</option>
+              <option value="flash_crash">FLASH SELLOFF IN TECH (-6.4% INSTANT)</option>
+              <option value="antitrust_probe">REGULATORY PROBE / MONOPOLY INJUNCTION</option>
+              <option value="supply_shock">GLOBAL HARDWARE SUPPLY BOTTLENECK</option>
+            </select>
+            <button id="btn-inject-shock" class="btn-tactical danger" style="width: 100%; padding: 4px;">
+              INJECT SHOCK &amp; SYNC SWARM
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER STATUS RIBBON & SESSION TIMER -->
+    <footer id="system-footer">
+      <div class="footer-cluster">
+        <div class="footer-item">
+          <span>APEX EXECUTOR:</span>
+          <span class="footer-val" id="footer-bot-state">SWARM_CHIEF // AUTONOMOUS_READY</span>
+        </div>
+        <div class="footer-item">
+          <span>INVARIANT LATCH:</span>
+          <span class="footer-val">SEC-ENCLAVE-01 [LOCKED]</span>
+        </div>
+        <div class="footer-item">
+          <span>SWARM SYNC:</span>
+          <span class="footer-val">100% CONVERGED</span>
+        </div>
+      </div>
+
+      <div class="footer-cluster">
+        <div class="footer-item">
+          <span>SESSION FOCUS:</span>
+          <span class="footer-val" id="session-timer">00:00:00</span>
+        </div>
+        <div class="footer-item">
+          <span>UTC: <span id="clock-utc" class="footer-val">00:00:00</span></span>
+        </div>
+        <div class="footer-item">
+          <span>EST: <span id="clock-est" class="footer-val">00:00:00</span></span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL 1: AI TRAINING & TRADE JOURNAL (DOWNLOADABLE FOR OTHER AIs) -->
+  <div class="telemetry-modal-overlay" id="modal-journal" role="dialog" aria-modal="true" aria-labelledby="modal-journal-title">
+    <div class="telemetry-modal" style="width: 860px;">
+      <div class="modal-header">
+        <span id="modal-journal-title" style="font-weight: 800; font-size: 11px; text-transform: uppercase;">
+          CHIEF EXECUTOR TRADE &amp; SELF-CRITIQUE JOURNAL [FOR LLM TRAINING &amp; AUDITING]
+        </span>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-tactical primary" id="btn-download-json">DOWNLOAD JSON</button>
+          <button class="btn-tactical" id="btn-download-md">DOWNLOAD MARKDOWN</button>
+          <button class="btn-tactical" id="btn-copy-journal">COPY PROMPT</button>
+          <button class="btn-tactical" id="btn-close-journal">[ESC] CLOSE</button>
+        </div>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" data-jtab="json">STRUCTURED JSON (FOR OTHER AIs)</button>
+        <button class="modal-tab-btn" data-jtab="markdown">ANALYTICAL MARKDOWN JOURNAL</button>
+        <button class="modal-tab-btn" data-jtab="retrospective">SELF-CRITIQUE &amp; ADAPTATION LOG</button>
+      </div>
+
+      <div class="modal-body" id="modal-journal-body">
+        <pre class="journal-code-block" id="journal-display"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: HISTORICAL BACKTEST DETAILED AUDIT LEDGER -->
+  <div class="telemetry-modal-overlay" id="modal-backtest" role="dialog" aria-modal="true" aria-labelledby="modal-backtest-title">
+    <div class="telemetry-modal" style="width: 880px;">
+      <div class="modal-header">
+        <span id="modal-backtest-title" style="font-weight: 800; font-size: 11px; text-transform: uppercase;">
+          HISTORICAL BACKTEST AUDIT LEDGER (TAURIC PROPAGATION)
+        </span>
+        <button class="btn-tactical" id="btn-close-backtest" style="padding: 2px 6px;">[ESC] CLOSE</button>
+      </div>
+      <div class="modal-body">
+        <table class="data-table" style="width: 100%;">
+          <thead>
+            <tr style="background: var(--bg-tertiary); color: var(--text-muted); font-size: 9px;">
+              <th style="padding: 5px; text-align: left;">TRADE ID</th>
+              <th style="padding: 5px; text-align: left;">DATE</th>
+              <th style="padding: 5px; text-align: left;">ASSET</th>
+              <th style="padding: 5px; text-align: left;">ACTION</th>
+              <th style="padding: 5px; text-align: right;">ENTRY</th>
+              <th style="padding: 5px; text-align: right;">EXIT</th>
+              <th style="padding: 5px; text-align: right;">PnL ($)</th>
+              <th style="padding: 5px; text-align: right;">PnL (%)</th>
+              <th style="padding: 5px; text-align: left;">SWARM THESIS</th>
+            </tr>
+          </thead>
+          <tbody id="backtest-ledger-body">
+            <!-- Dynamically injected -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMAND PALETTE (CTRL+K) -->
+  <div id="command-palette-overlay" role="dialog" aria-modal="true" aria-label="Command Palette">
+    <div class="command-palette-box">
+      <div class="palette-input-wrap">
+        <input type="text" id="palette-search-input" class="palette-input" placeholder="Type a ticker (NVDA, TSLA) or command (Trade, Backtest, Autonomous, Journal)..." autofocus>
+      </div>
+      <div class="palette-results" id="palette-results-list">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AGENT DEEP INTERNALS INSPECTOR -->
+  <div class="telemetry-modal-overlay" id="modal-inspector" role="dialog" aria-modal="true" aria-labelledby="modal-inspector-title">
+    <div class="telemetry-modal">
+      <div class="modal-header">
+        <span id="modal-inspector-title" style="font-weight: 800; font-size: 11px; text-transform: uppercase;">
+          NODE INSPECTION
+        </span>
+        <button class="btn-tactical" id="btn-close-inspector" style="padding: 2px 6px;">[ESC] CLOSE</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" data-tab="reasoning">ACTIVE REASONING TRACE</button>
+        <button class="modal-tab-btn" data-tab="tools">TOOL INVOCATIONS (DATAFLOW)</button>
+        <button class="modal-tab-btn" data-tab="memory">MEMORY &amp; REFLECTION BUFFER</button>
+        <button class="modal-tab-btn" data-tab="raw">RAW GRAPH STATE JSON</button>
+      </div>
+      <div class="modal-body" id="modal-inspector-body">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
